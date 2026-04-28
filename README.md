@@ -1,3 +1,3 @@
-# Final Project Template
+# Fitness Coaching API - ITIS 4166-052
 
-This repository provides the **folder structure** for your team’s final project. All implementation is left to students.
+A fitness platform used by coaches to create and assign workout plans to clients who can also track their progress and record a diary.
