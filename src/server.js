@@ -28,6 +28,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/programs', programRoutes);
 app.use('/api/workout-logs', workoutLogRoutes);
 app.use('/api/diary', diaryRoutes);
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Fitness Coaching API is running',
+    docs: '/api-docs',
+  });
+});
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
