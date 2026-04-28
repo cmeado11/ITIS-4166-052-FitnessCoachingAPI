@@ -6,6 +6,9 @@ info:
   description: REST API for fitness coaches to assign workout programs and for clients to track workout logs and diary entries.
 
 servers:
+  - url: https://itis-4166-052-fitnesscoachingapi.onrender.com/
+    description: Production Render server
+
   - url: http://localhost:3000
     description: Local development server
 
