@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  coach
+  client
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          Role
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  coachedPrograms Program[]    @relation("CoachPrograms")
+  clientPrograms  Program[]    @relation("ClientPrograms")
+  workoutLogs     WorkoutLog[]
+  diaryEntries    Diary[]
+}
+
+model Program {
+  id             Int      @id @default(autoincrement())
+  coach_id       Int
+  client_id      Int
+  title          String
+  goal           String
+  duration_weeks Int
+  status         String   @default("active")
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  coach  User @relation("CoachPrograms", fields: [coach_id], references: [id], onDelete: Cascade)
+  client User @relation("ClientPrograms", fields: [client_id], references: [id], onDelete: Cascade)
+
+  workoutLogs  WorkoutLog[]
+  diaryEntries Diary[]
+}
+
+model WorkoutLog {
+  id              Int      @id @default(autoincrement())
+  program_id      Int
+  client_id       Int
+  workout_date    DateTime
+  exercise_name   String
+  prescribed_sets Int
+  prescribed_reps Int
+  actual_sets     Int
+  actual_reps     Int
+  load            Float
+  rpe             Int
+  notes           String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  program Program @relation(fields: [program_id], references: [id], onDelete: Cascade)
+  client  User    @relation(fields: [client_id], references: [id], onDelete: Cascade)
+}
+
+model Diary {
+  id             Int      @id @default(autoincrement())
+  program_id     Int
+  client_id      Int
+  entry_date     DateTime
+  mood           String
+  energy_level   Int
+  soreness_level Int
+  comment        String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  program Program @relation(fields: [program_id], references: [id], onDelete: Cascade)
+  client  User    @relation(fields: [client_id], references: [id], onDelete: Cascade)
+}
