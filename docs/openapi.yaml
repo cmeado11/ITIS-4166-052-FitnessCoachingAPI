@@ -3,9 +3,1129 @@ openapi: 3.1.0
 info:
   title: Fitness Coaching API
   version: 1.0.0
-  description: REST API for fitness coaching and workout tracking
+  description: REST API for fitness coaches to assign workout programs and for clients to track workout logs and diary entries.
 
 servers:
   - url: http://localhost:3000
+    description: Local development server
 
-paths: {}
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Programs
+    description: Workout program endpoints
+  - name: Workout Logs
+    description: Workout log endpoints
+  - name: Diary
+    description: Diary entry endpoints
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+
+    ValidationErrorItem:
+      type: object
+      properties:
+        type:
+          type: string
+          example: field
+        value:
+          type: string
+          example: ""
+        msg:
+          type: string
+          example: Email is required
+        path:
+          type: string
+          example: email
+        location:
+          type: string
+          example: body
+
+    ValidationError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationErrorItem'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Test Coach1
+        email:
+          type: string
+          format: email
+          example: coach1@example.com
+        role:
+          type: string
+          enum:
+            - coach
+            - client
+          example: coach
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+
+    SignUpRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          example: Test Coach1
+        email:
+          type: string
+          format: email
+          example: coach1@example.com
+        password:
+          type: string
+          format: password
+          example: Password123!
+        role:
+          type: string
+          enum:
+            - coach
+            - client
+          example: coach
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: coach1@example.com
+        password:
+          type: string
+          format: password
+          example: Password123!
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+
+    Program:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        coach_id:
+          type: integer
+          example: 1
+        client_id:
+          type: integer
+          example: 3
+        title:
+          type: string
+          example: Beginner Strength Program
+        goal:
+          type: string
+          example: Build foundational strength
+        duration_weeks:
+          type: integer
+          example: 8
+        status:
+          type: string
+          example: active
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+
+    ProgramRequest:
+      type: object
+      required:
+        - client_id
+        - title
+        - goal
+        - duration_weeks
+      properties:
+        client_id:
+          type: integer
+          example: 3
+        title:
+          type: string
+          example: Beginner Strength Program
+        goal:
+          type: string
+          example: Build foundational strength
+        duration_weeks:
+          type: integer
+          example: 8
+        status:
+          type: string
+          example: active
+
+    WorkoutLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        program_id:
+          type: integer
+          example: 1
+        client_id:
+          type: integer
+          example: 3
+        workout_date:
+          type: string
+          format: date-time
+          example: 2026-04-28T00:00:00.000Z
+        exercise_name:
+          type: string
+          example: Barbell Squat
+        prescribed_sets:
+          type: integer
+          example: 3
+        prescribed_reps:
+          type: integer
+          example: 5
+        actual_sets:
+          type: integer
+          example: 3
+        actual_reps:
+          type: integer
+          example: 5
+        load:
+          type: number
+          format: float
+          example: 185
+        rpe:
+          type: integer
+          example: 8
+        notes:
+          type: string
+          nullable: true
+          example: Felt strong today
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+
+    WorkoutLogRequest:
+      type: object
+      required:
+        - program_id
+        - workout_date
+        - exercise_name
+        - prescribed_sets
+        - prescribed_reps
+        - actual_sets
+        - actual_reps
+        - load
+        - rpe
+      properties:
+        program_id:
+          type: integer
+          example: 1
+        workout_date:
+          type: string
+          format: date-time
+          example: 2026-04-28T00:00:00.000Z
+        exercise_name:
+          type: string
+          example: Barbell Squat
+        prescribed_sets:
+          type: integer
+          example: 3
+        prescribed_reps:
+          type: integer
+          example: 5
+        actual_sets:
+          type: integer
+          example: 3
+        actual_reps:
+          type: integer
+          example: 5
+        load:
+          type: number
+          format: float
+          example: 185
+        rpe:
+          type: integer
+          example: 8
+        notes:
+          type: string
+          example: Felt strong today
+
+    Diary:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        program_id:
+          type: integer
+          example: 1
+        client_id:
+          type: integer
+          example: 3
+        entry_date:
+          type: string
+          format: date-time
+          example: 2026-04-28T00:00:00.000Z
+        mood:
+          type: string
+          example: motivated
+        energy_level:
+          type: integer
+          example: 8
+        soreness_level:
+          type: integer
+          example: 4
+        comment:
+          type: string
+          example: Recovery is improving and workouts feel smoother.
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2026-04-28T15:00:00.000Z
+
+    DiaryRequest:
+      type: object
+      required:
+        - program_id
+        - entry_date
+        - mood
+        - energy_level
+        - soreness_level
+        - comment
+      properties:
+        program_id:
+          type: integer
+          example: 1
+        entry_date:
+          type: string
+          format: date-time
+          example: 2026-04-28T00:00:00.000Z
+        mood:
+          type: string
+          example: motivated
+        energy_level:
+          type: integer
+          example: 8
+        soreness_level:
+          type: integer
+          example: 4
+        comment:
+          type: string
+          example: Recovery is improving and workouts feel smoother.
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: Positive integer resource ID
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  requestBodies:
+    SignUpRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SignUpRequest'
+
+    LoginRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+
+    ProgramRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProgramRequest'
+
+    WorkoutLogRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WorkoutLogRequest'
+
+    DiaryRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DiaryRequest'
+
+  responses:
+    BadRequest:
+      description: Bad Request - Missing or invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          examples:
+            validationError:
+              summary: Validation error
+              value:
+                errors:
+                  - type: field
+                    msg: ID must be a positive integer
+                    path: id
+                    location: params
+
+    Unauthorized:
+      description: Unauthorized - User is not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Not authenticated. Please provide a valid token.
+
+    Forbidden:
+      description: Forbidden - User is authenticated but not authorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Forbidden
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Not Found
+
+    Conflict:
+      description: Conflict - Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Email has already been used
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Internal Server Error
+
+paths:
+  /api/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Create a new user account
+      description: Create a new coach or client account.
+      requestBody:
+        $ref: '#/components/requestBodies/SignUpRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                id: 1
+                name: Test Coach1
+                email: coach1@example.com
+                role: coach
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Log in and receive a JWT
+      description: Authenticate a user and return a JWT access token.
+      requestBody:
+        $ref: '#/components/requestBodies/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized - Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Invalid credentials
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/programs:
+    post:
+      tags:
+        - Programs
+      summary: Create a new program
+      description: Create a new workout program and assign it to a client. Coach only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ProgramRequest'
+      responses:
+        '201':
+          description: Program created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+              example:
+                id: 1
+                coach_id: 1
+                client_id: 3
+                title: Beginner Strength Program
+                goal: Build foundational strength
+                duration_weeks: 8
+                status: active
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Client not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Programs
+      summary: Get all visible programs
+      description: Coaches see programs they created. Clients see programs assigned to them.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Programs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Program'
+              example:
+                - id: 1
+                  coach_id: 1
+                  client_id: 3
+                  title: Beginner Strength Program
+                  goal: Build foundational strength
+                  duration_weeks: 8
+                  status: active
+                  created_at: 2026-04-28T15:00:00.000Z
+                  updated_at: 2026-04-28T15:00:00.000Z
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/programs/{id}:
+    get:
+      tags:
+        - Programs
+      summary: Get a program by ID
+      description: Retrieve a specific program. Owning coach or assigned client only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Program retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+              example:
+                id: 1
+                coach_id: 1
+                client_id: 3
+                title: Beginner Strength Program
+                goal: Build foundational strength
+                duration_weeks: 8
+                status: active
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Program not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Program not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Programs
+      summary: Update a program
+      description: Update an existing program. Owning coach only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/ProgramRequest'
+      responses:
+        '200':
+          description: Program updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+              example:
+                id: 1
+                coach_id: 1
+                client_id: 3
+                title: Updated Strength Program
+                goal: Increase total body strength
+                duration_weeks: 10
+                status: active
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T16:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Program not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Program not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Programs
+      summary: Delete a program
+      description: Delete an existing program. Owning coach only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Program deleted successfully. No response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Program not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Program not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/workout-logs:
+    post:
+      tags:
+        - Workout Logs
+      summary: Create a workout log
+      description: Create a workout log for a program assigned to the authenticated client. Client only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/WorkoutLogRequest'
+      responses:
+        '201':
+          description: Workout log created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutLog'
+              example:
+                id: 1
+                program_id: 1
+                client_id: 3
+                workout_date: 2026-04-28T00:00:00.000Z
+                exercise_name: Barbell Squat
+                prescribed_sets: 3
+                prescribed_reps: 5
+                actual_sets: 3
+                actual_reps: 5
+                load: 185
+                rpe: 8
+                notes: Felt strong today
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Program not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Program not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Workout Logs
+      summary: Get all visible workout logs
+      description: Clients see their own workout logs. Coaches see workout logs connected to programs they created.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Workout logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkoutLog'
+              example:
+                - id: 1
+                  program_id: 1
+                  client_id: 3
+                  workout_date: 2026-04-28T00:00:00.000Z
+                  exercise_name: Barbell Squat
+                  prescribed_sets: 3
+                  prescribed_reps: 5
+                  actual_sets: 3
+                  actual_reps: 5
+                  load: 185
+                  rpe: 8
+                  notes: Felt strong today
+                  created_at: 2026-04-28T15:00:00.000Z
+                  updated_at: 2026-04-28T15:00:00.000Z
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/workout-logs/{id}:
+    get:
+      tags:
+        - Workout Logs
+      summary: Get a workout log by ID
+      description: Retrieve a specific workout log. Owning client or program-owning coach only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Workout log retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutLog'
+              example:
+                id: 1
+                program_id: 1
+                client_id: 3
+                workout_date: 2026-04-28T00:00:00.000Z
+                exercise_name: Barbell Squat
+                prescribed_sets: 3
+                prescribed_reps: 5
+                actual_sets: 3
+                actual_reps: 5
+                load: 185
+                rpe: 8
+                notes: Felt strong today
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Workout log not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Workout log not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Workout Logs
+      summary: Update a workout log
+      description: Update an existing workout log. Owning client only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/WorkoutLogRequest'
+      responses:
+        '200':
+          description: Workout log updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutLog'
+              example:
+                id: 1
+                program_id: 1
+                client_id: 3
+                workout_date: 2026-04-28T00:00:00.000Z
+                exercise_name: Barbell Squat
+                prescribed_sets: 3
+                prescribed_reps: 5
+                actual_sets: 3
+                actual_reps: 6
+                load: 190
+                rpe: 9
+                notes: Last set was difficult
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T16:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Workout log not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Workout log not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Workout Logs
+      summary: Delete a workout log
+      description: Delete an existing workout log. Owning client only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Workout log deleted successfully. No response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Workout log not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Workout log not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/diary:
+    post:
+      tags:
+        - Diary
+      summary: Create a diary entry
+      description: Create a diary entry for a program assigned to the authenticated client. Client only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/DiaryRequest'
+      responses:
+        '201':
+          description: Diary entry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Diary'
+              example:
+                id: 1
+                program_id: 1
+                client_id: 3
+                entry_date: 2026-04-28T00:00:00.000Z
+                mood: motivated
+                energy_level: 8
+                soreness_level: 4
+                comment: Recovery is improving and workouts feel smoother.
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Program not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Program not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Diary
+      summary: Get all visible diary entries
+      description: Clients see their own diary entries. Coaches see diary entries connected to programs they created.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Diary entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Diary'
+              example:
+                - id: 1
+                  program_id: 1
+                  client_id: 3
+                  entry_date: 2026-04-28T00:00:00.000Z
+                  mood: motivated
+                  energy_level: 8
+                  soreness_level: 4
+                  comment: Recovery is improving and workouts feel smoother.
+                  created_at: 2026-04-28T15:00:00.000Z
+                  updated_at: 2026-04-28T15:00:00.000Z
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/diary/{id}:
+    get:
+      tags:
+        - Diary
+      summary: Get a diary entry by ID
+      description: Retrieve a specific diary entry. Owning client or program-owning coach only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Diary entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Diary'
+              example:
+                id: 1
+                program_id: 1
+                client_id: 3
+                entry_date: 2026-04-28T00:00:00.000Z
+                mood: motivated
+                energy_level: 8
+                soreness_level: 4
+                comment: Recovery is improving and workouts feel smoother.
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T15:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Diary entry not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Diary entry not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Diary
+      summary: Update a diary entry
+      description: Update an existing diary entry. Owning client only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/DiaryRequest'
+      responses:
+        '200':
+          description: Diary entry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Diary'
+              example:
+                id: 1
+                program_id: 1
+                client_id: 3
+                entry_date: 2026-04-28T00:00:00.000Z
+                mood: tired but motivated
+                energy_level: 6
+                soreness_level: 5
+                comment: Leg soreness is higher today, but progress is still good.
+                created_at: 2026-04-28T15:00:00.000Z
+                updated_at: 2026-04-28T16:00:00.000Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Diary entry not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Diary entry not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Diary
+      summary: Delete a diary entry
+      description: Delete an existing diary entry. Owning client only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Diary entry deleted successfully. No response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Diary entry not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Diary entry not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
