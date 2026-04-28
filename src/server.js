@@ -5,6 +5,7 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 
 import authRoutes from './routes/authRoutes.js';
+import programRoutes from './routes/programRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ try {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api/auth', authRoutes);
+app.use('/api/programs', programRoutes);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');

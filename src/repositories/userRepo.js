@@ -20,3 +20,9 @@ export async function createUser(data) {
 export async function findUserByEmail(email) {
   return prisma.user.findUnique({ where: { email } });
 }
+
+export async function findUserById(id) {
+  return prisma.user.findUnique({
+    where: { id },
+  });
+}
